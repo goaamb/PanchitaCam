@@ -1,0 +1,666 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>WEB SERVICE - 2.1.7.35</title>
+
+<script type="text/javascript" src="inc/mootools.js"></script>
+<script type="text/javascript" src="inc/webrec.js"></script>
+<link rel="stylesheet" type="text/css" media="screen"
+	href="inc/webrec.css" />
+<script type="text/javascript">
+	(function() {
+
+		Element.implement({
+			toggle : function(cls, fn1, fn2) {
+				if (this.className.indexOf(cls) >= 0) {
+					this.removeClass(cls);
+					if (fn2 && fn2.call) {
+						fn2.call(this);
+					}
+				} else {
+					this.addClass(cls);
+					if (fn1 && fn1.call) {
+						fn1.call(this);
+					}
+				}
+
+			}
+		});
+		window.onresize = function() {
+			var pla = $("pla");
+			if (pla.className.indexOf("toggled") >= 0) {
+				pla.setStyle("height", pla.oHeight);
+				pla.oHeight = pla.getStyle("height");
+				var h = pla.getSize().size.y - 33;
+				pla.setStyle("height", h + "px");
+			}
+		};
+	})();
+
+	function loginExtern(ip, user, pass, ltype, port) {
+		$("ip").value = ip;
+		$("username").value = user;
+		$("password").value = pass;
+		$("logintype").value = ltype;
+		$("port").value = port;
+		return ld();
+	}
+
+	function openAllCams() {
+		$("xac").onclick();
+	}
+	function togglePanels() {
+		$('m').toggle("toggled");
+		$('ma').toggle("hidded");
+		$('mb').toggle("toggled");
+		$('mc').toggle("hidded");
+		$('mba').toggle("hidded");
+		$('mbb').toggle("toggled");
+		$('mbc').toggle("hidded");
+		$('drb').toggle("hidded");
+		$('pla').toggle("toggled", function() {
+			this.oHeight = this.getStyle("height");
+			var h = this.getSize().size.y - 33;
+			this.setStyle("height", h + "px");
+		}, function() {
+			this.setStyle("height", this.oHeight);
+		});
+		$('plc').toggle("toggled");
+	}
+</script>
+<style type="text/css">
+.hidded {
+	display: none;
+}
+
+#m.toggled {
+	width: 100% !important;
+	height: 100% !important;
+}
+
+#mb.toggled {
+	width: 100% !important;
+	height: 100%;
+	padding-top: 0px;
+}
+
+#mbb.toggled {
+	padding-left: 0px !important;
+	width: 100% !important;
+	height: 100% !important;
+	left: 0px !important;
+}
+</style>
+<script language="javascript" for="ocx"
+	event="ReturnWindInfo(wid,cid,ps,sit)">
+	gptz = sit;
+	gwid = wid;
+	if (ps != 0) {
+		if (ps == 5 || ps == 4) {
+			$('pbh').setStyle('display', 'none');
+		} else {
+			$('pbh').setStyle('display', '');
+		}
+		getcolors();
+	}
+	setptzs();
+</script>
+<script language="javascript" for="ocx" event="ReturnPlayState(pos)">
+	sldtopos(gsld, pos);
+</script>
+<script language="javascript" for="ocx" event="StateChanged(ci,ps,wid)">
+	var oc;
+	if (ci != -1) {
+		oc = $('c' + ci);
+		if (ps == 0) {
+			oc.removeClass(oc.className);
+			oc.addClass('cl1');
+			$('xac').innerText = tl('W_ACO');
+			gopenall = 0;
+		}
+		if (glin) {
+			if (ps == 1) {
+				oc.removeClass(oc.className);
+				oc.addClass('cl2');
+				var ALL_ON = true;
+				for ( var i = 0; i < cnum; i++) {
+					if ($('c' + i).hasClass('cl1')) {
+						ALL_ON = false;
+						break;
+					}
+				}
+				if (ALL_ON) {
+					$('xac').innerText = tl('W_ACC');
+					gopenall = 1;
+				}
+			}
+		} else {
+			chAry.include(ci);
+		}
+		if (ps == 3) {
+			oc.removeClass(oc.className);
+			oc.addClass('cl3');
+		}
+		if (ps == 6) {
+			oc.removeClass(oc.className);
+			oc.addClass('cl2');
+		}
+	}
+	if (wid == gwid) {
+		if (ps == 3 || ps == 5) {
+			$('pbh').setStyle('display', 'none');
+		} else {
+			$('pbh').setStyle('display', '');
+		}
+		getcolors();
+	}
+</script>
+<script language="javascript" for="ocx"
+	event="DeviceDisconnected(ip,pt)">
+	loeft();
+</script>
+<script language="javascript" for="ocx"
+	event="Talk(talkState,extendPara)">
+	if (talkState == 1) {
+		if (gdj == 0)
+			cdj($('xdj'), tl('StopTalk'), tl('AudioTalk'));
+	} else {
+		if (gdj == 1)
+			cdj($('xdj'), tl('StopTalk'), tl('AudioTalk'));
+	}
+</script>
+<script language="javascript" for="ocx"
+	event="DeviceChanged(strDevIp, lPort, lType)">
+	if (lType == 1) {
+		rfc();
+	}
+	if (lType == 3) {
+		lo();
+		$('l').setStyle('display', 'none');
+		glin = false;
+		window.location.href = 'http://' + strDevIp;
+	}
+</script>
+</head>
+<body>
+
+	<div id='l'>
+		<div id='lx'>
+			<div id='lb'></div>
+			<div id='la'>
+				<div id='lal'></div>
+				<div id='lar'></div>
+				<div id='lalogo'></div>
+				<div id='lainput'>
+					<div>
+						<span>IP Address:</span><input type="text" id="ip"
+							onKeyDown="javascript:if (event.keyCode==13) event.keyCode=9;"
+							value="" size="20">
+					</div>
+					<div>
+						<span id='xyhm'>username:</span><input type='text' maxlength='20'
+							id='username'
+							onKeyDown="javascript:if (event.keyCode==13) event.keyCode=9;"
+							size="20">
+					</div>
+					<div>
+						<span id='xmm'>pass:</span><input type="password" maxlength="20"
+							id="password" onKeyDown="javascript:if (event.keyCode==13) ld();"
+							size="20">
+					</div>
+					<div id='ladvxx'>
+						<span id='xdlfs'>type</span><select id="logintype"
+							onKeyDown="javascript:if (event.keyCode==13) ld();"><option
+								value="0">TCP</option>
+							<option value="4">UDP</option>
+							<option id='xdlfszb' value="3">w_muticast</option></select>
+					</div>
+				</div>
+				<div id='laport'>
+					<input type="text" id="port"
+						onKeyDown="javascript:if (event.keyCode==13) event.keyCode=9;"
+						value="37777" size="4">
+				</div>
+				<div id='labt'>
+					<button id='lbt' onClick="ld()">l</button>
+					<div
+						style="position: relative; height: 20px; width: 88px; float: left; margin: 8px 0 0 1px; overflow: hidden; display: none;">
+						<a id='xladv' href="javascript:;"
+							onclick="toggleDisplay($('ladvxx'))">adv</a>
+					</div>
+				</div>
+			</div>
+			<div id='lc'></div>
+		</div>
+	</div>
+
+	<div id="m">
+		<div id="ma">
+			<div id="maa"></div>
+			<div id="mab"></div>
+			<div id="mac"></div>
+			<div id="mad"></div>
+			<div id=kwick>
+				<ul class=kwicks>
+					<li><span id='xlxcx' class="kwick b"
+						onclick="ocx.ShowPlayback()">recq</span></li>
+					<li><span id='xbjsz' class="kwick c" onclick="ocx.ShowAlarm()">ac</span></li>
+					<li><span id='xxtpz' class="kwick a"
+						onclick="ocx.ShowDeviceConfig()">sysc</span></li>
+					<li><span id='xgy' class="kwick d" onclick="showabout()">about</span></li>
+					<li><span id='xtc' class="kwick e" onclick="lo()">quit</span></li>
+				</ul>
+			</div>
+			<div id="mae"></div>
+		</div>
+		<div id="mb">
+			<div id="mba" style="float: left; padding: 0 0 0 5px;">
+				<div class="mpad">
+					<div id='dra' class="drabc1">
+						<div class="drabc2"></div>
+						<div class="drabc3"></div>
+						<div class="drabc4"></div>
+					</div>
+					<div id='mbal'
+						style="height: 533px; position: relative; overflow: hidden;">
+						<div id='cup'
+							style="margin-left: 5px; width: 129px; height: 9px; overflow: hidden; display: none; position: relative; top: 0; z-index: 30;">
+							<a id='up1' class="y1" href="javascript:;"></a>
+						</div>
+						<div id='dcl' style="float: left; position: relative;">
+							<ul id='cl'></ul>
+							<div id='cmu' title='' style="z-index: 40;"></div>
+						</div>
+						<div id='cdw'
+							style="margin-left: 5px; width: 129px; height: 9px; overflow: hidden; display: none; position: relative; top: 352;">
+							<a id='dw1' class="y2" href="javascript:;"></a>
+						</div>
+						<div id='ddj' style="width: 100%; height: 100px;">
+							<div style="float: left; position: relative; z-index: 50">
+								<div style="padding: 10px 0 0 4px; float: left">
+									<a id='xac' class="cbt" href="javascript:;"
+										onclick="openall(this,tl('W_ACC'),tl('W_ACO'))">open all</a><a
+										href="javascript:;" class="cbtm" onclick="showmnuopen()"></a>
+								</div>
+								<div id="mnuopen" style="display: none">
+									<ul id='mnuopenl'></ul>
+								</div>
+							</div>
+							<div style="float: left; position: relative;">
+								<div style="padding: 10px 0 0 4px; float: left" id="xdj0">
+									<a id='xdj' class="cbt" href="javascript:;"
+										onclick="cdj(this,tl('StopTalk'),tl('AudioTalk'))">st</a><a
+										href="javascript:;" class="cbtm" onclick="showmnudj()"></a>
+								</div>
+								<div id="mnudj" style="display: none">
+									<ul id='mnudjl'></ul>
+								</div>
+							</div>
+							<div style="padding: 10px 0 0 4px; float: left">
+								<a id='xhf' style="display: none" class="cbt"
+									href="javascript:;" onclick="ocx.QuickOperation(0)">playback</a>
+							</div>
+							<div style="padding: 10px 0 0 4px; float: left">
+								<a id='xsxt' class="cbt" href="javascript:;" onclick="rfc()">refresh</a>
+							</div>
+							<div style="padding: 10px 0 0 4px; float: left">
+								<a id='xkl' style="display: none" class="cbt"
+									href="javascript:;" onclick="ocx.ShowBurning()">kel</a>
+							</div>
+							<!--
+      <div style="margin:5px 0 0 4px;">
+        <div style='width:21px; height:21px;background:url(img/yl.png);float:left' title='volue'></div>
+        <div style="margin:4px 0 0 4px;float:left"><a class="sal" href="javascript:;" onclick="gslde.set(gslde.step-1)"></a></div>
+        <div id='sae' style="width:70px;height:13px;margin:4px 0 0 4px;float:left;background:url(img/sas.png) repeat-x">
+        <div id='ske' style="width:6px;height:13px;background:url(img/sks.png) no-repeat; cursor:pointer;"></div>
+        </div>
+        <div style="margin:4px 0 0 4px; float:left;"><a class="sar" href="javascript:;" onclick="gslde.set(gslde.step+1)"></a></div>
+      </div>
+      -->
+						</div>
+						<div style="padding: 0 0 0 4px; float: left">
+							<a id='xfmq' style="display: none" class="cbt"
+								href="javascript:;" onclick="closebeep()">closebeep</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="mbb"
+				style="width: 650px; height: 500px; float: left; left: 120px; padding: 0 0 0 5px;">
+				<div id="drb" class="drabc1">
+					<div class="drabc2"></div>
+					<div class="drabc3"></div>
+					<div class="drabc4"></div>
+				</div>
+				<div id='pla'
+					style="width: 100%; height: 100%; float: left; padding: 0">
+
+					<!--EMBED OCX-->
+					<script type="text/javascript" src="inc/object.js"></script>
+
+				</div>
+				<div id='plc'
+					style="width: 100%; float: left; height: 33px; background: url('img/plcb.png');">
+					<div
+						style="width: 7px; height: 33px; float: left; background: url('img/plcbl.png') no-repeat 0 0;"></div>
+					<div id='pbh'
+						style="background: url('img/plcb.png'); width: 580px; height: 33px; position: absolute; margin-left: 7px; z-index: 10"></div>
+					<div id='pb'
+						style="height: 26px; margin: 3px 0 0 10px; position: absolute; z-index: 9; overflow: hidden;">
+						<div id='sa'>
+							<div id='sk'></div>
+						</div>
+						<div id='pc' style="float: left;">
+							<div style="margin: 0 0 0 5px">
+								<a id='xp1' class="p1" href="javascript:;"
+									onclick="ocx.PlayVideo(1)"></a>
+							</div>
+							<div style="margin: 0 0 0 10px">
+								<a id='xp2' class="p2" href="javascript:;"
+									onclick="ocx.PlayVideo(2)"></a>
+							</div>
+							<div style="margin: 0 0 0 10px">
+								<a id='xp3' class="p3" href="javascript:;"
+									onclick="ocx.PlayVideo(3)"></a>
+							</div>
+							<div style="margin: 0 0 0 10px">
+								<a id='xp4' class="p4" href="javascript:;"
+									onclick="ocx.PlayVideo(5)"></a>
+							</div>
+							<div style="margin: 0 0 0 10px">
+								<a id='xp5' class="p5" href="javascript:;"
+									onclick="ocx.PlayVideo(4)"></a>
+							</div>
+							<!--<div style="margin:0 0 0 10px"><a class="p6" href="javascript:;"></a></div>
+      <div style="margin:0 0 0 10px"><a class="p7" href="javascript:;"></a></div>-->
+						</div>
+					</div>
+					<div
+						style="width: 7px; height: 33px; float: right; background: url('img/plcbl.png') no-repeat -7px 0;"></div>
+				</div>
+			</div>
+			<div id="mbc" style="float: left; padding: 0 0 0 5px; width: 140px;">
+				<div class="mpad" style="float: left;">
+					<div id='drc' class="drabc1">
+						<div class="drabc2"></div>
+						<div class="drabc3"></div>
+						<div class="drabc4"></div>
+					</div>
+					<div id='yt'
+						style="height: 120px; position: relative; padding: 0 10px 0 10px;">
+						<div style="width: 33px; height: 26px; padding: 14px 0 0 7px;">
+							<a class="y1" href="javascript:;"
+								onmousedown="ocx.ControlPtz(32,5,$('ps').value,0,0)"
+								onmouseup="ocx.ControlPtz(32,5,$('ps').value,0,1)"></a>
+						</div>
+						<div style="width: 33px; height: 26px; padding: 14px 0 0 7px;">
+							<a class="y2" href="javascript:;"
+								onmousedown="ocx.ControlPtz(0,0,$('ps').value,0,0)"
+								onmouseup="ocx.ControlPtz(0,0,$('ps').value,0,1)"></a>
+						</div>
+						<div style="width: 33px; height: 26px; padding: 14px 0 0 7px;">
+							<a class="y3" href="javascript:;"
+								onmousedown="ocx.ControlPtz(33,5,$('ps').value,0,0)"
+								onmouseup="ocx.ControlPtz(33,5,$('ps').value,0,1)"></a>
+						</div>
+						<div style="width: 33px; height: 33px; padding: 7px 0 0 7px;">
+							<a class="y4" href="javascript:;"
+								onmousedown="ocx.ControlPtz(2,0,$('ps').value,0,0)"
+								onmouseup="ocx.ControlPtz(2,0,$('ps').value,0,1)"></a>
+						</div>
+						<div style="width: 40px; height: 40px;">
+							<a id='cptz' class="y5" href="javascript:;" onclick="cptz()"></a>
+						</div>
+						<div style="width: 33px; height: 33px; padding: 7px 0 0 7px;">
+							<a class="y6" href="javascript:;"
+								onmousedown="ocx.ControlPtz(3,0,$('ps').value,0,0)"
+								onmouseup="ocx.ControlPtz(3,0,$('ps').value,0,1)"></a>
+						</div>
+						<div style="width: 33px; height: 40px; padding: 0 0 0 7px;">
+							<a class="y7" href="javascript:;"
+								onmousedown="ocx.ControlPtz(34,5,$('ps').value,0,0)"
+								onmouseup="ocx.ControlPtz(34,5,$('ps').value,0,1)"></a>
+						</div>
+						<div style="width: 33px; height: 40px; padding: 0 0 0 7px;">
+							<a class="y8" href="javascript:;"
+								onmousedown="ocx.ControlPtz(1,0,$('ps').value,0,0)"
+								onmouseup="ocx.ControlPtz(1,0,$('ps').value,0,1)"></a>
+						</div>
+						<div style="width: 33px; height: 40px; padding: 0 0 0 7px;">
+							<a class="y9" href="javascript:;"
+								onmousedown="ocx.ControlPtz(35,5,$('ps').value,0,0)"
+								onmouseup="ocx.ControlPtz(35,5,$('ps').value,0,1)"></a>
+						</div>
+					</div>
+					<div
+						style="width: 132px; height: 20px; padding: 0 0 0 8px; position: relative; overflow: hidden;">
+						<div id='xbc' class="divt" style="float: left;">(1-8):</div>
+						<div
+							style="width: 53px; height: 18px; background: url('img/ytabg.png'); float: left; padding-left: 3px; padding-right: 0; padding-top: 0; padding-bottom: 0">
+							<input class="inputyt" type="text" id="ps" value="5"
+								maxlength="1" onkeyup="limitPs()"
+								onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))"
+								size="20"> <a href="javascript:;" class="yta1"
+								onclick="showmu1()"></a>
+						</div>
+					</div>
+					<div id="smu1" style="display: none">
+						<ul>
+							<li><a href='javascript:;' onclick='onmu1(1)'>1</a></li>
+							<li><a href='javascript:;' onclick='onmu1(2)'>2</a></li>
+							<li><a href='javascript:;' onclick='onmu1(3)'>3</a></li>
+							<li><a href='javascript:;' onclick='onmu1(4)'>4</a></li>
+							<li><a href='javascript:;' onclick='onmu1(5)'>5</a></li>
+							<li><a href='javascript:;' onclick='onmu1(6)'>6</a></li>
+							<li><a href='javascript:;' onclick='onmu1(7)'>7</a></li>
+							<li><a href='javascript:;' onclick='onmu1(8)'>8</a></li>
+						</ul>
+					</div>
+					<div id='yt1'
+						style="height: 90px; position: relative; margin: 0 5px 0 5px;">
+						<div style="padding: 0 0 5px 14px;">
+							<a class="y1" href="javascript:;"
+								onmousedown="ocx.ControlPtz(4,0,$('ps').value,0,0)"
+								onmouseup="ocx.ControlPtz(4,0,$('ps').value,0,1)"></a>
+						</div>
+						<div id='xbb'
+							style="height: 18px; width: 50px; padding: 8px 0 0 0; text-align: center;">bb</div>
+						<div style="padding: 0 0 5px 0;">
+							<a class="y2" href="javascript:;"
+								onmousedown="ocx.ControlPtz(5,0,$('ps').value,0,0)"
+								onmouseup="ocx.ControlPtz(5,0,$('ps').value,0,1)"></a>
+						</div>
+						<div style="padding: 0 0 5px 14px;">
+							<a class="y1" href="javascript:;"
+								onmousedown="ocx.ControlPtz(6,0,$('ps').value,0,0)"
+								onmouseup="ocx.ControlPtz(6,0,$('ps').value,0,1)"></a>
+						</div>
+						<div id='xbj'
+							style="height: 18px; width: 50px; padding: 8px 0 0 0; text-align: center;">bj</div>
+						<div style="padding: 0 0 5px 0;">
+							<a class="y2" href="javascript:;"
+								onmousedown="ocx.ControlPtz(7,0,$('ps').value,0,0)"
+								onmouseup="ocx.ControlPtz(7,0,$('ps').value,0,1)"></a>
+						</div>
+						<div style="padding: 0 0 5px 14px;">
+							<a class="y1" href="javascript:;"
+								onmousedown="ocx.ControlPtz(8,0,$('ps').value,0,0)"
+								onmouseup="ocx.ControlPtz(8,0,$('ps').value,0,1)"></a>
+						</div>
+						<div id='xgq'
+							style="height: 18px; width: 50px; padding: 8px 0 0 0; text-align: center;">gq</div>
+						<div style="padding: 0 0 5px 0;">
+							<a class="y2" href="javascript:;"
+								onmousedown="ocx.ControlPtz(9,0,$('ps').value,0,0)"
+								onmouseup="ocx.ControlPtz(9,0,$('ps').value,0,1)"></a>
+						</div>
+					</div>
+					<div id='yt2'
+						style="height: 100%; position: relative; padding: 0 0 0 4px; float: left;">
+						<div id='yt21' style="height: 0; overflow: hidden; float: left;">
+							<div class='cbtd'>
+								<div id='xz' class="divt">(0-255):</div>
+								<input type="text" class="inputyt" id="pv" value="1"
+									maxlength="3" onkeyup="limitPv()"
+									onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))"
+									size="20">
+							</div>
+							<div class='cbtd'>
+								<a id='xyzd' class="cbt" href="javascript:;"
+									onclick="ocx.ControlPtz(10,0,$('pv').value,0,0)">yzd</a>
+							</div>
+							<div class='cbtd'>
+								<a id='xdjxh' class="cbt" href="javascript:;"
+									onclick="cxh(this,tl('Stop'),tl('Auto-Tour'),tl('Auto-Pan'),tl('Auto-Scan'),tl('Pattern'))">djxh</a>
+							</div>
+							<div class='cbtd'>
+								<a id='xspxz' class="cbt" href="javascript:;"
+									onclick="cxz(this,tl('Stop'),tl('Auto-Tour'),tl('Auto-Pan'),tl('Auto-Scan'),tl('Pattern'))">spxz</a>
+							</div>
+							<div class='cbtd'>
+								<a id='xxs' class="cbt" href="javascript:;"
+									onclick="cxs(this,tl('Stop'),tl('Auto-Tour'),tl('Auto-Pan'),tl('Auto-Scan'),tl('Pattern'))">xs</a>
+							</div>
+							<div class='cbtd'>
+								<a id='xxuj' class="cbt" href="javascript:;"
+									onclick="cxj(this,tl('Stop'),tl('Auto-Tour'),tl('Auto-Pan'),tl('Auto-Scan'),tl('Pattern'))">xj</a>
+							</div>
+							<div class='cbtd'>
+								<a id='xfzk' class="cbt" href="javascript:;"
+									onclick="ocx.ControlPtz(52,$('pv').value,0,0,0)">open</a>
+							</div>
+							<div class='cbtd'>
+								<a id='xfzg' class="cbt" href="javascript:;"
+									onclick="ocx.ControlPtz(53,$('pv').value,0,0,0)">close</a>
+							</div>
+							<div class='cbtd'>
+								<a id='xytsz' class="cbt" href="javascript:;"
+									onclick="ocx.ShowSetptz()">ptzsetup</a>
+							</div>
+						</div>
+						<div id='yt22'
+							style="width: 129px; height: 9px; overflow: hidden; float: left;">
+							<a id='ayt22' class="y1" href="javascript:;"></a>
+						</div>
+					</div>
+				</div>
+				<div id='taba' style="float: left; margin: 3px 0 0 0; width: 140px;">
+					<div style="float: left">
+						<a id='taba1' class="t1" href="javascript:;">pic</a>
+					</div>
+					<div style="float: left">
+						<a id='taba2' class="t2" href="javascript:;">other</a>
+					</div>
+				</div>
+				<div class="mpad" style="float: left;">
+					<div id='yt3'
+						style="height: 287px; position: relative; overflow: hidden; margin: 0 0 0 4px;">
+						<div id='yt3t1' style="height: 100%;">
+							<div id='yt3t1a'>
+								<div style="margin: 5px 0 0 0;">
+									<div id='xtld'
+										style='width: 21px; height: 21px; background: url(img/tx1.png) no-repeat 0 0;'
+										title='ld'></div>
+									<div style="margin: 4px 0 0 4px;">
+										<a class="sal" href="javascript:;" onclick="gslda.set(gca-1)"></a>
+									</div>
+									<div id='saa' class="sax">
+										<div id='ska' class="skx"></div>
+									</div>
+									<div style="margin: 4px 0 0 4px;">
+										<a class="sar" href="javascript:;" onclick="gslda.set(gca+1)"></a>
+									</div>
+								</div>
+								<div style="margin: 5px 0 0 0;">
+									<div id='xtdbd'
+										style='width: 21px; height: 21px; background: url(img/tx1.png) no-repeat -21px 0;'
+										title='dbd'></div>
+									<div style="margin: 4px 0 0 4px;">
+										<a class="sal" href="javascript:;" onclick="gsldb.set(gcb-1)"></a>
+									</div>
+									<div id='sab' class="sax">
+										<div id='skb' class="skx"></div>
+									</div>
+									<div style="margin: 4px 0 0 4px;">
+										<a class="sar" href="javascript:;" onclick="gsldb.set(gcb+1)"></a>
+									</div>
+								</div>
+								<div style="margin: 5px 0 0 0;">
+									<div id='xtbhd'
+										style='width: 21px; height: 21px; background: url(img/tx1.png) no-repeat -42px 0;'
+										title='bhd'></div>
+									<div style="margin: 4px 0 0 4px;">
+										<a class="sal" href="javascript:;" onclick="gsldc.set(gcc-1)"></a>
+									</div>
+									<div id='sac' class="sax">
+										<div id='skc' class="skx"></div>
+									</div>
+									<div style="margin: 4px 0 0 4px;">
+										<a class="sar" href="javascript:;" onclick="gsldc.set(gcc+1)"></a>
+									</div>
+								</div>
+								<div style="margin: 5px 0 0 0;">
+									<div id='xtsd'
+										style='width: 21px; height: 21px; background: url(img/tx1.png) no-repeat -63px 0;'
+										title='sd'></div>
+									<div style="margin: 4px 0 0 4px;">
+										<a class="sal" href="javascript:;" onclick="gsldd.set(gcd-1)"></a>
+									</div>
+									<div id='sad' class="sax">
+										<div id='skd' class="skx"></div>
+									</div>
+									<div style="margin: 4px 0 0 4px;">
+										<a class="sar" href="javascript:;" onclick="gsldd.set(gcd+1)"></a>
+									</div>
+								</div>
+							</div>
+							<div style="padding: 5px 0 0 0;">
+								<a id='xcz' class="cbt" href="javascript:;"
+									onclick="txreset(64);">reset</a>
+							</div>
+						</div>
+						<div id='yt3t2'
+							style="height: 100%; display: none; position: relative;">
+							<div class='cbtd'>
+								<a id='xztlj' class="cbt" href="javascript:;"
+									onclick="ocx.SetConfigPath(1);" title="">cp</a>
+							</div>
+							<div class='cbtd'>
+								<a id='xlxlj' class="cbt" href="javascript:;"
+									onclick="ocx.SetConfigPath(2);" title="">rp</a>
+							</div>
+							<div class='cbtd'>
+								<a id='xcqsb' class="cbt" href="javascript:;"
+									onclick="reboot();" title="">reboot</a>
+							</div>
+							<div class='cbtd' style="visibility: hidden">
+								<a id='xxx' class="cbt" href="javascript:;" onclick="" title="">rebootdd</a>
+							</div>
+							<div
+								style="height: 60px; width: 128px; padding: 5px 0 0 8px; position: relative; overflow: hidden; display: none;">
+								<div id='rdty' class="divt" style="width: 60px; float: left;">ReFormat</div>
+								<div
+									style="width: 53px; height: 18px; background: url('img/ytabg.png'); float: left; padding-left: 3px; padding-right: 0; padding-top: 0; padding-bottom: 0">
+									<input readonly class="inputyt" type="text" value="DAV"
+										id="rtys" size="20"> <a href="javascript:;"
+										class="yta1" onclick="showmu2()"></a>
+								</div>
+								<div id="smu2" style="display: none;">
+									<ul>
+										<li><a href='javascript:;' onclick='onmu2(0)'>DAV</a></li>
+										<li><a href='javascript:;' onclick='onmu2(1)'>ASF</a></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--mbc-->
+		</div>
+		<div id="mc"></div>
+
+	</div>
+</body>
+</html>
