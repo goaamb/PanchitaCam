@@ -32,7 +32,7 @@
 			if (pla.className.indexOf("toggled") >= 0) {
 				pla.setStyle("height", pla.oHeight);
 				pla.oHeight = pla.getStyle("height");
-				var h = pla.getSize().size.y - 33;
+				var h = pla.getSize().size.y;
 				pla.setStyle("height", h + "px");
 			}
 		};
@@ -61,12 +61,12 @@
 		$('drb').toggle("hidded");
 		$('pla').toggle("toggled", function() {
 			this.oHeight = this.getStyle("height");
-			var h = this.getSize().size.y - 33;
+			var h = this.getSize().size.y;
 			this.setStyle("height", h + "px");
 		}, function() {
 			this.setStyle("height", this.oHeight);
 		});
-		$('plc').toggle("toggled");
+		$('plc').toggle("hidded");
 	}
 </script>
 <style type="text/css">
