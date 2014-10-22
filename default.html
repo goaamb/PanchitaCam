@@ -68,6 +68,18 @@
 		});
 		$('plc').toggle("hidded");
 	}
+	function obtenerCamaras() {
+		var c = $$("ul#cl li");
+		var t = [];
+		for ( var i = 0; i < c.length; i++) {
+			var d=$(c[i]).getElement("div");
+			t.push(d.getAttribute("id") + "," + c[i].getAttribute("title"));
+		}
+		return t.join(";");
+	}
+	function llamarCamara(c){
+		$(c).fireEvent("click");
+	}
 </script>
 <style type="text/css">
 .hidded {
@@ -441,7 +453,7 @@
 							<input class="inputyt" type="text" id="ps" value="5"
 								maxlength="1" onkeyup="limitPs()"
 								onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))"
-								size="20"> <a href="javascript:;" class="yta1"
+								size="20"><a href="javascript:;" class="yta1"
 								onclick="showmu1()"></a>
 						</div>
 					</div>
@@ -643,7 +655,7 @@
 								<div
 									style="width: 53px; height: 18px; background: url('img/ytabg.png'); float: left; padding-left: 3px; padding-right: 0; padding-top: 0; padding-bottom: 0">
 									<input readonly class="inputyt" type="text" value="DAV"
-										id="rtys" size="20"> <a href="javascript:;"
+										id="rtys" size="20"><a href="javascript:;"
 										class="yta1" onclick="showmu2()"></a>
 								</div>
 								<div id="smu2" style="display: none;">
