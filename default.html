@@ -72,13 +72,13 @@
 		var c = $$("ul#cl li");
 		var t = [];
 		for ( var i = 0; i < c.length; i++) {
-			var d=$(c[i]).getElement("div");
+			var d = $(c[i]).getElement("div");
 			t.push(d.getAttribute("id") + "," + c[i].getAttribute("title"));
 		}
 		return t.join(";");
 	}
-	function llamarCamara(c){
-		$(c).fireEvent("click");
+	function llamarCamara(c) {
+		$(c).onclick();
 	}
 </script>
 <style type="text/css">
